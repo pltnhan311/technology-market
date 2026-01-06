@@ -54,3 +54,17 @@ export const SORT_OPTIONS = [
     { value: 'price-desc', label: 'Giá cao → thấp' },
     { value: 'newest', label: 'Mới nhất' },
 ] as const;
+
+// Shipping fees
+export const SHIPPING_FEE = {
+    MAJOR_CITY: 30000, // HN, HCM
+    OTHER_CITY: 50000,
+} as const;
+
+export const MAJOR_CITIES = ['hanoi', 'hochiminh'];
+
+export function getShippingFee(cityValue: string): number {
+    return MAJOR_CITIES.includes(cityValue.toLowerCase())
+        ? SHIPPING_FEE.MAJOR_CITY
+        : SHIPPING_FEE.OTHER_CITY;
+}
