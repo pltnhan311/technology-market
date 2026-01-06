@@ -1,11 +1,120 @@
+import { useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
+import { seedProducts } from '@/data/seed-products';
+import { CATEGORIES } from '@/lib/constants';
+import { formatPrice } from '@/lib/utils';
+import { Breadcrumb } from '@/components/product/Breadcrumb';
+import { ProductGallery } from '@/components/product/ProductGallery';
+import { ProductInfo } from '@/components/product/ProductInfo';
+import { QuantityPicker } from '@/components/product/QuantityPicker';
+import { CTAButtons } from '@/components/product/CTAButtons';
+import { ProductTabs } from '@/components/product/ProductTabs';
+import { RelatedProducts } from '@/components/product/RelatedProducts';
+import { Button } from '@/components/ui/button';
+
 export function ProductDetailPage() {
+    const { slug } = useParams<{ slug: string }>();
+    const [quantity, setQuantity] = useState(1);
+
+    // Find product by slug
+    const product = seedProducts.find((p) => p.slug === slug);
+
+    // If product not found, redirect to 404
+    if (!product) {
+        return <Navigate to="/404" replace />;
+    }
+
+    // Get category info
+    const categoryInfo = CATEGORIES.find((c) => c.slug === product.category);
+    const categoryName = categoryInfo?.name || product.category;
+
     return (
-        <div className="container mx-auto max-w-7xl px-4 py-12">
-            <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Product Detail Page</h1>
-                <p className="text-gray-600">
-                    This page will be implemented in Phase 2
-                </p>
+        <div className="min-h-screen bg-white">
+            <div className="container mx-auto max-w-7xl px-4 py-6 md:py-8">
+                {/* Breadcrumb */}
+                <Breadcrumb
+                    items={[
+                        { label: 'Home', href: '/' },
+                        { label: categoryName, href: `/category/${product.category}` },
+                        { label: product.name, href: `/product/${slug}` },
+                    ]}
+                />
+
+                {/* Product Details - Two Column Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mt-6">
+                    {/* Left Column - Gallery */}
+                    <div>
+                        <ProductGallery images={product.images} productName={product.name} />
+                    </div>
+
+                    {/* Right Column - Product Info */}
+                    <div className="space-y-6">
+                        <ProductInfo product={product} />
+
+                        <div className="border-t pt-6">
+                            <QuantityPicker
+                                stock={product.stock}
+                                value={quantity}
+                                onChange={setQuantity}
+                            />
+                        </div>
+
+                        <CTAButtons />
+
+                        {/* Features/Highlights */}
+                        <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
+                            <ul className="space-y-2">
+                                <li className="flex items-center gap-2">
+                                    <span className="text-primary">✓</span>
+                                    <span>Bảo hành chính hãng 12 tháng</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <span className="text-primary">✓</span>
+                                    <span>Giao hàng miễn phí toàn quốc</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <span className="text-primary">✓</span>
+                                    <span>Hỗ trợ trả góp 0% lãi suất</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Product Tabs */}
+                <div className="mt-12">
+                    <ProductTabs product={product} />
+                </div>
+            </div>
+
+            {/* Related Products */}
+            <div className="bg-gray-50">
+                <RelatedProducts
+                    category={product.category}
+                    currentProductId={product.id}
+                />
+            </div>
+
+            {/* Mobile Sticky Bottom Bar */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 md:hidden z-40">
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <div className="text-xs text-gray-600">Giá</div>
+                        <div className="text-xl font-bold text-primary">
+                            {formatPrice(product.price)}
+                        </div>
+                    </div>
+                    <Button
+                        size="lg"
+                        className="flex-1"
+                        disabled
+                        title="Tính năng sắp ra mắt - Phase 2"
+                    >
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Thêm vào giỏ
+                    </Button>
+                </div>
             </div>
         </div>
     );
