@@ -1,21 +1,25 @@
 import { useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 import { seedProducts } from '@/data/seed-products';
 import { CATEGORIES } from '@/lib/constants';
 import { formatPrice } from '@/lib/utils';
+import { useCartStore } from '@/store/cartStore';
 import { Breadcrumb } from '@/components/product/Breadcrumb';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductInfo } from '@/components/product/ProductInfo';
 import { QuantityPicker } from '@/components/product/QuantityPicker';
-import { CTAButtons } from '@/components/product/CTAButtons';
 import { ProductTabs } from '@/components/product/ProductTabs';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
 import { Button } from '@/components/ui/button';
 
 export function ProductDetailPage() {
     const { slug } = useParams<{ slug: string }>();
+    const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
+
+    const { addToCart, setCartOpen } = useCartStore();
 
     // Find product by slug
     const product = seedProducts.find((p) => p.slug === slug);
@@ -29,8 +33,29 @@ export function ProductDetailPage() {
     const categoryInfo = CATEGORIES.find((c) => c.slug === product.category);
     const categoryName = categoryInfo?.name || product.category;
 
+    const isOutOfStock = product.stock === 0;
+
+    const handleAddToCart = () => {
+        if (isOutOfStock) return;
+
+        addToCart(product, quantity);
+        toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`, {
+            duration: 2000,
+            position: 'top-center',
+        });
+        setCartOpen(true);
+    };
+
+    const handleBuyNow = () => {
+        if (isOutOfStock) return;
+
+        addToCart(product, quantity);
+        navigate('/checkout');
+    };
+
     return (
         <div className="min-h-screen bg-white">
+            <Toaster />
             <div className="container mx-auto max-w-7xl px-4 py-6 md:py-8">
                 {/* Breadcrumb */}
                 <Breadcrumb
@@ -60,7 +85,27 @@ export function ProductDetailPage() {
                             />
                         </div>
 
-                        <CTAButtons />
+                        {/* CTA Buttons - Now Enabled */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Button
+                                size="lg"
+                                className="flex-1 h-12"
+                                onClick={handleAddToCart}
+                                disabled={isOutOfStock}
+                            >
+                                <ShoppingCart className="h-5 w-5 mr-2" />
+                                {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                            </Button>
+                            <Button
+                                size="lg"
+                                variant="secondary"
+                                className="flex-1 h-12"
+                                onClick={handleBuyNow}
+                                disabled={isOutOfStock}
+                            >
+                                Mua ngay
+                            </Button>
+                        </div>
 
                         {/* Features/Highlights */}
                         <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
@@ -108,11 +153,11 @@ export function ProductDetailPage() {
                     <Button
                         size="lg"
                         className="flex-1"
-                        disabled
-                        title="Tính năng sắp ra mắt - Phase 2"
+                        onClick={handleAddToCart}
+                        disabled={isOutOfStock}
                     >
                         <ShoppingCart className="h-5 w-5 mr-2" />
-                        Thêm vào giỏ
+                        {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
                     </Button>
                 </div>
             </div>

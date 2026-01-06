@@ -2,6 +2,16 @@
 
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-secondary: #F97316;
+  --color-secondary-hover: #EA580C;
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #ECC94B;
+}
+
 @layer base {
   :root {
     --radius: 0.5rem;
