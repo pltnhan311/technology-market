@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Home } from '@/pages/Home';
 import { CategoryPage } from '@/pages/CategoryPage';
 import { ProductDetailPage } from '@/pages/ProductDetailPage';
+import { SearchResultsPage } from '@/pages/SearchResultsPage';
 import { NotFound } from '@/pages/NotFound';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
             <Layout>
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/search" element={<SearchResultsPage />} />
                     <Route path="/category/:slug" element={<CategoryPage />} />
                     <Route path="/product/:slug" element={<ProductDetailPage />} />
                     <Route path="*" element={<NotFound />} />
