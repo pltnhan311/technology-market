@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { SearchDropdown } from '@/components/search/SearchDropdown';
 import { CartSheet } from '@/components/cart/CartSheet';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { UserMenu } from '@/components/layout/UserMenu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -192,12 +193,11 @@ export function Header() {
 
                         {/* User Button */}
                         {isAuthenticated && user ? (
-                            <button
-                                onClick={handleUserClick}
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white font-semibold hover:bg-primary-hover transition"
-                            >
-                                {getUserInitial()}
-                            </button>
+                            <UserMenu>
+                                <button className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white font-semibold hover:bg-primary-hover transition cursor-pointer">
+                                    {getUserInitial()}
+                                </button>
+                            </UserMenu>
                         ) : (
                             <Button
                                 variant="ghost"
