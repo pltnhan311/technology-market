@@ -5,8 +5,10 @@ import { seedProducts } from '@/data/seed-products';
 import { searchProducts } from '@/lib/searchUtils';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import { SearchDropdown } from '@/components/search/SearchDropdown';
 import { CartSheet } from '@/components/cart/CartSheet';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -15,10 +17,12 @@ export function Header() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const { cart, setCartOpen } = useCartStore();
+    const { user, isAuthenticated } = useAuthStore();
     const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
     const debouncedQuery = useDebounce(searchQuery, 300);
@@ -101,6 +105,21 @@ export function Header() {
         setCartOpen(true);
     };
 
+    const handleUserClick = () => {
+        if (!isAuthenticated) {
+            setIsAuthModalOpen(true);
+        } else {
+            navigate('/profile');
+        }
+    };
+
+    const getUserInitial = () => {
+        if (user && user.name) {
+            return user.name.charAt(0).toUpperCase();
+        }
+        return 'U';
+    };
+
     return (
         <>
             <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -170,9 +189,35 @@ export function Header() {
                                 </Badge>
                             )}
                         </Button>
-                        <Button variant="ghost" size="icon">
-                            <User className="h-5 w-5" />
-                        </Button>
+
+                        {/* User Button */}
+                        {isAuthenticated && user ? (
+                            <button
+                                onClick={handleUserClick}
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white font-semibold hover:bg-primary-hover transition"
+                            >
+                                {getUserInitial()}
+                            </button>
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                onClick={handleUserClick}
+                                className="hidden md:flex"
+                            >
+                                <User className="h-5 w-5 mr-2" />
+                                Đăng nhập
+                            </Button>
+                        )}
+                        {!isAuthenticated && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleUserClick}
+                                className="md:hidden"
+                            >
+                                <User className="h-5 w-5" />
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -216,6 +261,12 @@ export function Header() {
 
             {/* Cart Sheet */}
             <CartSheet />
+
+            {/* Auth Modal */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+            />
         </>
     );
 }
