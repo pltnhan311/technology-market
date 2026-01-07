@@ -5,6 +5,7 @@ import { CategoryPage } from '@/pages/CategoryPage';
 import { ProductDetailPage } from '@/pages/ProductDetailPage';
 import { SearchResultsPage } from '@/pages/SearchResultsPage';
 import { CheckoutPage } from '@/pages/CheckoutPage';
+import { OrderConfirmationPage } from '@/pages/OrderConfirmationPage';
 import { NotFound } from '@/pages/NotFound';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
                     <Route path="/category/:slug" element={<CategoryPage />} />
                     <Route path="/product/:slug" element={<ProductDetailPage />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </Layout>
