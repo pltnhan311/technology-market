@@ -4,6 +4,7 @@ import { Loader2, Package, Truck, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '@/store/cartStore';
 import { useCheckoutStore } from '@/store/checkoutStore';
+import { useAuthStore } from '@/store/authStore';
 import { getShippingFee } from '@/lib/constants';
 import { formatPrice } from '@/lib/utils';
 import { CITIES, DISTRICTS } from '@/lib/addressData';
@@ -16,6 +17,7 @@ export function ReviewOrderForm() {
     const { cart, getCartTotal, clearCart } = useCartStore();
     const { shippingInfo, paymentMethod, orderNote, resetCheckout, setStep } =
         useCheckoutStore();
+    const { user } = useAuthStore();
 
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,15 +37,6 @@ export function ReviewOrderForm() {
         DISTRICTS[shippingInfo.city]?.find((d) => d.value === shippingInfo.district)
             ?.label || shippingInfo.district;
 
-    // Calculate estimated delivery
-    const estimatedDelivery = new Date();
-    estimatedDelivery.setDate(estimatedDelivery.getDate() + 2);
-    const deliveryEndDate = new Date(estimatedDelivery);
-    deliveryEndDate.setDate(deliveryEndDate.getDate() + 1);
-
-    const formatDate = (date: Date) => {
-        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    };
 
     const handlePlaceOrder = async () => {
         if (!agreedToTerms) {
@@ -60,6 +53,7 @@ export function ReviewOrderForm() {
             // Create order object
             const order = {
                 id: orderId,
+                ...(user && { userId: user.id }), // Add userId if user is logged in
                 guestInfo: {
                     name: shippingInfo.name,
                     email: shippingInfo.email,
@@ -73,9 +67,13 @@ export function ReviewOrderForm() {
                     price: item.product.price,
                 })),
                 shippingAddress: {
+                    id: `addr_${Date.now()}`,
+                    name: shippingInfo.name,
+                    phone: shippingInfo.phone,
                     address: shippingInfo.address,
-                    district: districtLabel,
-                    city: cityLabel,
+                    district: shippingInfo.district, // Save value, not label
+                    city: shippingInfo.city, // Save value, not label
+                    isDefault: false,
                 },
                 paymentMethod,
                 shippingFee,

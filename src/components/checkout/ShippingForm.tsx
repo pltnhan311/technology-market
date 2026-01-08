@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { useCheckoutStore, ShippingInfo } from '@/store/checkoutStore';
+import { useAuthStore } from '@/store/authStore';
 import { CITIES, DISTRICTS } from '@/lib/addressData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +35,7 @@ type ShippingFormData = z.infer<typeof shippingSchema>;
 export function ShippingForm() {
     const navigate = useNavigate();
     const { shippingInfo, setShippingInfo, setStep } = useCheckoutStore();
+    const { user } = useAuthStore();
 
     const {
         register,
@@ -52,6 +55,24 @@ export function ShippingForm() {
             district: '',
         },
     });
+
+    // Auto-fill form with user data if logged in and no shipping info exists
+    useEffect(() => {
+        if (user && !shippingInfo) {
+            // Fill basic user info
+            if (user.name) setValue('name', user.name);
+            if (user.email) setValue('email', user.email);
+            if (user.phone) setValue('phone', user.phone);
+
+            // Fill address info from first saved address if available
+            if (user.addresses && user.addresses.length > 0) {
+                const firstAddress = user.addresses[0];
+                if (firstAddress.address) setValue('address', firstAddress.address);
+                if (firstAddress.city) setValue('city', firstAddress.city);
+                if (firstAddress.district) setValue('district', firstAddress.district);
+            }
+        }
+    }, [user, shippingInfo, setValue]);
 
     const selectedCity = watch('city');
 
